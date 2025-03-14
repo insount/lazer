@@ -31,6 +31,9 @@ class MainWindow(QMainWindow):
 
         self.init_ui()
 
+        # Подключаем сигнал клика по полю из LaserView
+        self.laser_view.coordinate_clicked.connect(self.handle_field_click)
+
     def init_ui(self):
         container = QWidget()
         layout = QVBoxLayout(container)
@@ -93,6 +96,20 @@ class MainWindow(QMainWindow):
 
         # При каждом обновлении координат обновляем label
         self.motor.position_changed.connect(self.update_coordinates)
+
+    def handle_field_click(self, x, y):
+        """
+        Обрабатывает клик по полю (LaserView) и запускает движение лазера к этой точке.
+        """
+        print(f"[DEBUG] Клик по полю: ({x}, {y})")
+        # Обновляем поля ввода координат, если это нужно
+        self.x_input.setValue(x)
+        self.y_input.setValue(y)
+        # Запускаем движение лазера к этим координатам
+        speed = self.speed_input.value()
+        self.motor.set_speed(speed)
+        self.motor.drawing = self.laser.laser_on
+        self.motor.move_to(x, y)
 
     def load_and_process_image(self):
         """

@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPainter, QPen, QColor, QImage
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 
 class LaserView(QWidget):
+    coordinate_clicked = pyqtSignal(int, int)
     def __init__(self):
         super().__init__()
         self.grid_size = 25    # Размер клетки
@@ -16,12 +17,8 @@ class LaserView(QWidget):
         # Если он None, значит пока ничего не загружено
         self.points_image = None
 
-        # Предположим, поле 500x500 (как в MotorController)
         self.field_width = 500
         self.field_height = 500
-
-        # Если у вас поле может меняться, можно сделать гибче,
-        # или брать поле из config
 
     def update_position(self, x: int, y: int):
         """
@@ -121,3 +118,18 @@ class LaserView(QWidget):
         painter.setBrush(Qt.GlobalColor.red)
         lx, ly = map(int, self.laser_position)
         painter.drawEllipse(lx - 3, ly - 3, 6, 6)
+
+    def mousePressEvent(self, event):
+        """
+        При клике ЛКМ вычисляем координаты поля (без margin)
+        и эмитируем сигнал coordinate_clicked.
+        """
+        if event.button() == Qt.MouseButton.LeftButton:
+            x_click = event.position().x()
+            y_click = event.position().y()
+            # Преобразуем координаты клика в координаты поля
+            x_field = int(x_click - self.margin)
+            y_field = int(y_click - self.margin)
+            if 0 <= x_field < self.field_width and 0 <= y_field < self.field_height:
+                self.coordinate_clicked.emit(x_field, y_field)
+        super().mousePressEvent(event)

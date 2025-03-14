@@ -69,6 +69,12 @@ class MainWindow(QMainWindow):
         self.laser_view.setStyleSheet("border: 4px solid black;")
         layout.addWidget(self.laser_view)
 
+        # Кнопка "Лупа" для включения режима зума
+        self.magnifier_button = QPushButton("Лупа")
+        self.magnifier_button.setCheckable(True)
+        self.magnifier_button.toggled.connect(self.toggle_zoom_mode)
+        layout.addWidget(self.magnifier_button)
+
         # Кнопка загрузки изображения
         self.load_image_button = QPushButton("Загрузить и анализировать изображение")
         self.load_image_button.clicked.connect(self.load_and_process_image)
@@ -96,6 +102,17 @@ class MainWindow(QMainWindow):
 
         # При каждом обновлении координат обновляем label
         self.motor.position_changed.connect(self.update_coordinates)
+
+    def toggle_zoom_mode(self, enabled):
+        """
+        Включает или выключает режим зума в LaserView.
+        При включении правый клик будет увеличивать масштаб.
+        """
+        self.laser_view.set_zoom_enabled(enabled)
+        if not enabled:
+            # Сбрасываем масштаб до 1.0, когда режим зума выключен.
+            self.laser_view.zoom_factor = 1.0
+            self.laser_view.update()
 
     def handle_field_click(self, x, y):
         """
@@ -287,6 +304,13 @@ class MainWindow(QMainWindow):
             self.laser_button.setText("Выключить лазер")
             self.motor.drawing = True
             self.laser_view.add_trail(None, None)  # разрыв
+
+    def toggle_zoom_mode(self, enabled):
+        self.laser_view.set_zoom_enabled(enabled)
+        if not enabled:
+            # Сброс зума до исходного состояния
+            self.laser_view.zoom_factor = 1.0
+            self.laser_view.update()
 
     def stop_movement(self):
         self.motor.stop()

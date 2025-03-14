@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
     def load_and_process_image(self):
         """
         Загружает изображение через ImageLoader, анализирует его, создаёт laser_simulation,
-        рисует точки в LaserView и открывает диалог с анимацией прожига.
+        и открывает диалог с анимацией прожига (не затрагивая главное поле LaserView).
         """
         file_path = self.image_loader.load_image()
         if not file_path:
@@ -113,8 +113,9 @@ class MainWindow(QMainWindow):
         # Создаём белое изображение для симуляции
         self.image_loader.create_laser_simulation()
 
-        # Отображаем точки в LaserView (если нужно)
-        self.laser_view.set_laser_path(points)
+        # НЕ вызываем self.laser_view.set_laser_path(points),
+        # чтобы не отображать это изображение в главном поле.
+        # self.laser_view.set_laser_path(points)  # <-- закомментировано!
 
         # Открываем диалог с тремя изображениями (оригинал, бинарка, laser_simulation)
         self.show_images_dialog()
